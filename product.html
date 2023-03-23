@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        *{margin: 0;}
+        body{
+            width: 720px;
+            margin: auto;
+            margin-top: 20px;
+        }
+        div{display: flex;}
+        .change{
+            flex-direction: column;
+            gap: 10px;
+        }
+        .wrap{gap: 13px;}
+        button, input{
+            font-size: 16px;
+        }
+        table{
+            width: 100%;
+            background-color: #000;
+        }
+        thead{
+            font-size: 22px;
+            text-align: center;
+        }
+        td{
+            width: 120px;
+            background-color: #fff;
+        }
+        tbody td{text-align: center;padding: 0 10px;}
+        tbody td:nth-child(1){text-align: left;}
+        tbody td:nth-child(2){width: 240px;}
+        tbody td:nth-child(4){text-align: right;}
+    </style>
+</head>
+<body>
+    <div class="change">
+        <div class="wrap">
+            <div class="row">
+                <p>商品類型：</p>
+                <select name="ProductType" id="type">
+                    <option>全部</option>
+                    <option>3C</option>
+                    <option>食品</option>
+                    <option>飲料</option>
+                </select>
+            </div>
+            <div class="row">
+                <p>價格範圍：</p>
+                <select name="Price" id="price">
+                    <option>全部</option>
+                    <option value="1000">＜1000</option>
+                    <option value="100000">≧1000</option>
+                </select>
+            </div>
+            <button id="filter">篩選商品</button>
+        </div>
+        <div class="wrap">
+            <div class="row">
+                <p>商品查詢：</p>
+                <input type="text" placeholder="請輸入商品編號" size="22">
+            </div>
+            <button id="check">確認查詢</button>
+        </div>
+    </div>
+    <p>全部商品：</p>
+    <div id="container"></div>
+
+    <script type="module"> 
+        //資料表
+        import {product} from "/module/product.js";
+
+        let container = document.getElementById("container");
+        let table = document.createElement("table");
+        let thead = document.createElement("thead");
+        let tbody = document.createElement("tbody");
+        
+        //thead
+        //let key = Object.keys(product[0]);
+        //console.log(key);
+        let title = ["產品編號", "產品名稱", "產品數量", "產品價格", "產品類型"];
+        let tr = document.createElement("tr"); //thead>tr
+        title.forEach(item =>{
+            let td = document.createElement("td");
+            td.innerHTML = item;
+            tr.append(td);
+        })
+        thead.append(tr);
+        table.append(thead);
+
+        //tbody
+        //let value = Object.values(product[0]);
+        //console.log(value);
+        for(var i=0;i<product.length;i++){ //總共幾筆產品資料
+            let  value = Object.values(product[i]); //某筆資料儲存位置
+            let tr = document.createElement("tr"); //tbody>tr
+            value.forEach(item =>{
+                let td = document.createElement("td");
+                td.innerText = item;
+                //判斷產品數量是否為0
+                if(td.innerText==0){
+                    console.log(td);
+                    tr.style.color = "Red";
+                    tr.style.fontWeight = 800;
+                }
+                tr.append(td);
+            })
+            tbody.append(tr);
+        }
+        table.append(tbody);
+        container.append(table);
+        // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+        let btnFilter, btnCheck;
+        window.onload = function(){
+            btnFilter = document.getElementById("filter");
+            btnCheck = document.getElementById("check");
+
+            btnFilter.addEventListener("click", showfilter);
+            btnCheck.addEventListener("click", showcheck);
+        }
+        function showfilter(){
+            let type = document.getElementById("type").value;
+            let price = document.getElementById("price").value;
+            // console.log(type);
+            
+            var filtertype = product.filter(function(item, index, array){
+                if(type=="全部"){
+                    return item;
+                }
+                else{
+                    return item.ProductType === type;
+                }
+            });
+            // console.log(filtertype);
+
+            var filterprice = filtertype.filter(function(item, index, array){
+                if(price=="全部"){
+                    return item;
+                }
+                else if(price!=1000){
+                    return item.Price >= 1000;
+                }
+                else{
+                    return item.Price < price;
+                }
+            });
+            // console.log(filterprice);
+            
+            tbody.innerHTML = ""; //清除table>tbody的資料
+
+            for(var i=0;i<filterprice.length;i++){ //總共幾筆產品資料
+                let  value = Object.values(filterprice[i]); //某筆資料儲存位置
+                let tr = document.createElement("tr"); //tbody>tr
+                value.forEach(item =>{
+                    let td = document.createElement("td");
+                    td.innerText = item;
+                    //判斷產品數量是否為0
+                    if(td.innerText==0){
+                        console.log(td);
+                        tr.style.color = "Red";
+                        tr.style.fontWeight = 800;
+                    }
+                    tr.append(td);
+                })
+                tbody.append(tr);
+            }
+            table.append(tbody);
+            container.append(table);
+        }
+        function showcheck(){
+            let value = document.querySelector("input").value;
+            var filterprice = product.filter(function(item, index, array){
+                return item.ProductNumber == value;
+            });
+
+            tbody.innerHTML = ""; //清除table>tbody的資料
+
+            for(var i=0;i<filterprice.length;i++){ //總共幾筆產品資料
+                let  value = Object.values(filterprice[i]); //某筆資料儲存位置
+                let tr = document.createElement("tr"); //tbody>tr
+                value.forEach(item =>{
+                    let td = document.createElement("td");
+                    td.innerText = item;
+                    //判斷產品數量是否為0
+                    if(td.innerText==0){
+                        console.log(td);
+                        tr.style.color = "Red";
+                        tr.style.fontWeight = 800;
+                    }
+                    tr.append(td);
+                })
+                tbody.append(tr);
+            }
+            table.append(tbody);
+            container.append(table);
+        }
+    </script>
+</body>
+</html>
